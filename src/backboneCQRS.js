@@ -76,6 +76,7 @@
             
                 options = _.extend(this.defaults, options);
                 if (options.parseEvent) this.parseEvent = options.parseEvent;
+                if (options.getCommandId) this.getCommandId = options.getCommandId;
 
                 this.commandsChannel = options.commandsChannel;
 
