@@ -201,6 +201,35 @@
 
     Backbone.CQRS.eventHandler = new EventHandler();
 
+    // Extend Backbone.Model
+    // ---------------------
+
+    Backbone.Model = Backbone.Model.extend({
+        
+        modelName: null, // you must set this
+
+        bindCQRS: function(modelName) {
+            if (modelName) this.modelName = modelName;
+            if (!this.modelName) return;
+            var id = this.id || this.cid;
+
+            Backbone.CQRS.eventHandler.bind(this.modelName + ':' + id, this.apply);
+        },
+
+        unbindCQRS: function(modelName) {
+            if (modelName) this.modelName = modelName;
+            if (!this.modelName) return;
+            var id = this.id || this.cid;
+
+            Backbone.CQRS.eventHandler.unbind(this.modelName + ':' + id, this.apply);
+        },
+
+        apply: function(data) { 
+            this.set(data);
+        }
+
+    });
+
     // Functions
     // ---------
 

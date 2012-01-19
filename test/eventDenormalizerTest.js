@@ -112,3 +112,43 @@ asyncTest("Pass event through denormalizer to model", function() {
     // when
     Backbone.CQRS.hub.emit('events', '{"eventName": "myEvent4", "payload": {"id": "4", "project": "Backbone.CQRS"}}');
 });
+
+asyncTest("Pass event through denormalizer to cqrs extended model", function() {
+
+    // given
+    Backbone.CQRS.hub.init({
+        parseEvent: function(msg) {
+            var data = JSON.parse(msg);
+            return {
+                name: data.eventName,
+                payload: data.payload
+            };
+        }
+    });
+
+    var myEventDenormalizer = new Backbone.CQRS.EventDenormalizer({
+        forModel: 'myModel',
+        forEvent: 'myEvent5'
+    });
+
+    var myModel = Backbone.Model.extend({
+        
+        apply: function(data) {
+            
+            equals(data.name, 'myEvent5', 'get eventName');
+            equals(data.id, '5', 'get model id');
+            equals(data.get('name'), 'myEvent5', 'get eventName from attr');
+            equals(data.get('payload').project, 'Backbone.CQRS', 'get value from payload');
+
+            start();
+
+        }
+
+    });
+
+    var m = new myModel({id: 5});
+    m.bindCQRS('myModel');
+
+    // when
+    Backbone.CQRS.hub.emit('events', '{"eventName": "myEvent5", "payload": {"id": "5", "project": "Backbone.CQRS"}}');
+});
