@@ -62,20 +62,23 @@
         },
 
         init: function(options) {
+            if (!this.initialized) {
+                this.initialized = true;
             
-            options = _.extend(this.defaults, options);
-            if (options.parseEvent) this.parseEvent = options.parseEvent;
+                options = _.extend(this.defaults, options);
+                if (options.parseEvent) this.parseEvent = options.parseEvent;
 
-            this.on(options.eventsChannel, function(msg) {              
-                var evt = new Backbone.CQRS.Event();
-                evt.set(this.parseEvent(msg));
+                this.on(options.eventsChannel, function(msg) {              
+                    var evt = new Backbone.CQRS.Event();
+                    evt.set(this.parseEvent(msg));
 
-                var attrs = evt.toJSON();
-                evt.name = dive(attrs, options.eventNameAttr);
-                evt.id = dive(attrs, options.eventModelIdAttr);
-                
-                this.emit('dispatchEvent', evt);
-            });
+                    var attrs = evt.toJSON();
+                    evt.name = dive(attrs, options.eventNameAttr);
+                    evt.id = dive(attrs, options.eventModelIdAttr);
+                    
+                    this.emit('dispatchEvent', evt);
+                });
+            }
 
         }
     };
