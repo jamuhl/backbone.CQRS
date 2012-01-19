@@ -36,8 +36,16 @@
         destroy: noop
     });
 
-    Backbone.CQRS.Event = Backbone.CQRS.Message;
-    Backbone.CQRS.Command = Backbone.CQRS.Message;
+    var Event = Backbone.CQRS.Message.extend({});
+    Backbone.CQRS.Command = Backbone.CQRS.Message.extend({
+        emit: function() {
+            Backbone.CQRS.hub.emit(Backbone.CQRS.hub.commandsChannel, this.parse(this.toJSON()));
+        },
+
+        parse: function(data) {
+            return data;
+        }
+    });
 
 
     // Event Handling
@@ -45,20 +53,14 @@
 
     // Hub will listen to events and pass them to the eventdispatcher
     var hub = Backbone.CQRS.hub = {
+
+        commandsChannel: 'commands',
         
         defaults: {
             commandsChannel: 'commands',
             eventsChannel: 'events',
             eventNameAttr: 'name',
             eventModelIdAttr: 'payload.id'
-        },
-
-        parseEvent: function(msg) {
-            var evt = msg;
-            if (typeof evt == 'string') {
-                evt = JSON.parse(evt);
-            }
-            return evt;
         },
 
         init: function(options) {
@@ -68,8 +70,10 @@
                 options = _.extend(this.defaults, options);
                 if (options.parseEvent) this.parseEvent = options.parseEvent;
 
+                this.commandsChannel = options.commandsChannel;
+
                 this.on(options.eventsChannel, function(msg) {              
-                    var evt = new Backbone.CQRS.Event();
+                    var evt = new Event();
                     evt.set(this.parseEvent(msg));
 
                     var attrs = evt.toJSON();
@@ -80,14 +84,22 @@
                 });
             }
 
+        },
+
+        parseEvent: function(msg) {
+            var evt = msg;
+            if (typeof evt == 'string') {
+                evt = JSON.parse(evt);
+            }
+            return evt;
         }
+
     };
     _.extend(hub, Backbone.Events);
 
     // we use Backbone.Event but provide EventEmitters interface
     hub.on = hub.bind;
     hub.emit = hub.trigger;
-
 
     // EventDenormalizer
     // --------------
