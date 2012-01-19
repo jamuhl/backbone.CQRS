@@ -1,0 +1,17 @@
+{
+  "author": "jamuhl"
+  , "name": "i18next-clientscript"
+  , "version": "0.0.1"
+  , "private": false
+  , "main": "server.js"
+  , "engines": {
+        "node": "~v0.4.12"
+    }
+  , "dependencies": { }
+  , "devDependencies": {
+      "smoosh": "0.2.x"
+    , "jake": ">=0.0.1"
+  }
+  , "scripts": {
+  }
+}
