@@ -1,16 +1,6 @@
 asyncTest("Pass event through denormalizer with custom handle", function() {
 
     // given
-    Backbone.CQRS.hub.init({
-        parseEvent: function(msg) {
-            var data = JSON.parse(msg);
-            return {
-                name: data.eventName,
-                payload: data.payload
-            };
-        }
-    });
-
     var myEventDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
         handle: function(evt) {
             equals(evt.name, 'myEvent2', 'get eventName');
@@ -35,16 +25,6 @@ asyncTest("Pass event through multiple denormalizer with custom handle", functio
 
     // given
     var todo = 2;
-
-    Backbone.CQRS.hub.init({
-        parseEvent: function(msg) {
-            var data = JSON.parse(msg);
-            return {
-                name: data.eventName,
-                payload: data.payload
-            };
-        }
-    });
 
     var myEventDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
         handle: function(evt) {
@@ -75,16 +55,6 @@ asyncTest("Pass event through multiple denormalizer with custom handle", functio
 asyncTest("Pass event through denormalizer to model", function() {
 
     // given
-    Backbone.CQRS.hub.init({
-        parseEvent: function(msg) {
-            var data = JSON.parse(msg);
-            return {
-                name: data.eventName,
-                payload: data.payload
-            };
-        }
-    });
-
     var myEventDenormalizer = new Backbone.CQRS.EventDenormalizer({
         forModel: 'myModel',
         forEvent: 'myEvent4'
@@ -116,16 +86,6 @@ asyncTest("Pass event through denormalizer to model", function() {
 asyncTest("Pass event through denormalizer to cqrs extended model", function() {
 
     // given
-    Backbone.CQRS.hub.init({
-        parseEvent: function(msg) {
-            var data = JSON.parse(msg);
-            return {
-                name: data.eventName,
-                payload: data.payload
-            };
-        }
-    });
-
     var myEventDenormalizer = new Backbone.CQRS.EventDenormalizer({
         forModel: 'myModel',
         forEvent: 'myEvent5'

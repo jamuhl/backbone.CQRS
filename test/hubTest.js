@@ -37,15 +37,6 @@ asyncTest("emit parsed backbone.CQRS.Event", function() {
     };
 
     Backbone.CQRS.hub.on('dispatchEvent', process);
-    Backbone.CQRS.hub.init({
-        parseEvent: function(msg) {
-            var data = JSON.parse(msg);
-            return {
-                name: data.eventName,
-                payload: data.payload
-            };
-        }
-    });
 
     // when
     Backbone.CQRS.hub.emit('events', '{"eventName": "myEvent", "payload": {"id": "1", "project": "Backbone.CQRS"}}');

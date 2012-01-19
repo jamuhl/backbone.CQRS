@@ -44,6 +44,10 @@
 
         parse: function(data) {
             return data;
+        },
+
+        observe: function(callback) {
+            Backbone.CQRS.eventHandler.observe(this.id, callback);
         }
     });
 
@@ -60,10 +64,13 @@
             commandsChannel: 'commands',
             eventsChannel: 'events',
             eventNameAttr: 'name',
-            eventModelIdAttr: 'payload.id'
+            eventModelIdAttr: 'payload.id',
+            eventResponseToCommandId: 'commandId'
         },
 
         init: function(options) {
+            var self = this;
+
             if (!this.initialized) {
                 this.initialized = true;
             
@@ -79,6 +86,7 @@
                     var attrs = evt.toJSON();
                     evt.name = dive(attrs, options.eventNameAttr);
                     evt.id = dive(attrs, options.eventModelIdAttr);
+                    evt.cmdId = self.getCommandId(attrs, options.eventResponseToCommandId);
                     
                     this.emit('dispatchEvent', evt);
                 });
@@ -92,6 +100,10 @@
                 evt = JSON.parse(evt);
             }
             return evt;
+        },
+
+        getCommandId: function(data, field) {
+            return dive(data, field);
         }
 
     };
@@ -151,6 +163,7 @@
         
         initialize: function() {
             this.denormalizers = [];
+            this.observedCommands = [];
             
             Backbone.CQRS.hub.on('dispatchEvent', function(evt) {
                 this.handle(evt);
@@ -173,6 +186,14 @@
         },
 
         handle: function(evt) {
+            // observing commands
+            var pending = this.getPendingCommand(evt);
+            if (pending) {
+                pending.callback(evt);
+                this.removePendingCommand(pending);
+            }
+
+            // denormalize
             var denorm = this.getDenormalizer(evt.name);
 
             _(denorm).each(function(d) {
@@ -206,6 +227,21 @@
             _(denorm).each(function(d) {
                 d.unbind(evtName, callback);
             });
+        },
+
+        observe: function(cmdId, callback) {
+            this.observedCommands.push({id: cmdId, callback: callback});
+        },
+
+        getPendingCommand: function(evt) {
+            return _.detect(this.observedCommands, function(pend) {
+                return pend.id == evt.cmdId;
+            });
+        },
+        
+        removePendingCommand: function(pending) {
+            var index = _.indexOf(this.observedCommands, pending);       
+            this.observedCommands.splice(index, 1);
         },
 
         register: function(denormalizer) {
