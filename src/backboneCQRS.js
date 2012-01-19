@@ -145,11 +145,11 @@
 
         getDenormalizer: function(forEvent, forModel) {
             if (forEvent) {
-                return _(this.denormalizers).detect(function(r) {
+                return _(this.denormalizers).filter(function(r) {
                     return r.forEvent == forEvent;
                 });
             } else if (forModel) {
-                return _(this.denormalizers).detect(function(r) {
+                return _(this.denormalizers).filter(function(r) {
                     return r.forModel == forModel;
                 });
             } else {
@@ -160,7 +160,9 @@
         handle: function(evt) {
             var denorm = this.getDenormalizer(evt.name);
 
-            if (denorm) denorm.handle(evt);
+            _(denorm).each(function(d) {
+                d.handle(evt);
+            });
         },
 
         bind: function(ev, callback, context) {
@@ -172,7 +174,9 @@
             
             var denorm = this.getDenormalizer(null, modelName);
 
-            if (denorm) denorm.bind(evtName, callback, context);
+            _(denorm).each(function(d) {
+                d.bind(evtName, callback, context);
+            });
         },
 
         unbind: function(ev, callback) {
@@ -184,7 +188,9 @@
             
             var denorm = this.getDenormalizer(null, modelName);
 
-            if (denorm) denorm.unbind(evtName, callback);
+            _(denorm).each(function(d) {
+                d.unbind(evtName, callback);
+            });
         },
 
         register: function(denormalizer) {
