@@ -56,11 +56,11 @@ The interface to Backbone.CQRS is provided through `Backbone.CQRS.hub`:
 
 	// pass in events from your socket
 	mySocket.on('events', function(data){
-		Backbone.CQRS.emit('events', data);
+		Backbone.CQRS.hub.emit('events', data);
 	});
 
 	// pass commands to socket
-	Backbone.CQRS.on('commands', function(data) {
+	Backbone.CQRS.hub.on('commands', function(data) {
 		mySocket.emit('commands', data);
 	});
 
