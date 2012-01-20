@@ -9,6 +9,10 @@ To use CQRS on the clientside and inside Backbone.js we will need to push _event
 to the browser. You can achieve this via websockets, flash, long polling or any 
 other technique around.
 
+### Or have a look at sample
+
+You can find it in the [sample folder](https://github.com/jamuhl/backbone.CQRS/tree/master/sample).
+
 ## INITIALIZATION
 
 To configure Backbone.CQRS you got to init the `Backbone.CQRS.hub`.
@@ -74,7 +78,7 @@ override the _handle_ function in the eventdenormalizer:
     var PersonCreateHandler = Backbone.CQRS.EventDenormalizer.extend({
         handle: function(evt) {
             // do something
-            var person = new person(evt.payload);
+            var person = new person(evt.get('payload'));
             app.persons.add(person);
         }
     });
