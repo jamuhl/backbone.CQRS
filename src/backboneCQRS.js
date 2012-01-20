@@ -1,8 +1,6 @@
-//     Backbone.js 0.5.3
-//     (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
-//     Backbone may be freely distributed under the MIT license.
-//     For all details and documentation:
-//     http://documentcloud.github.com/backbone
+//     Backbone.CQRS.js
+//     (c) 2012 Jan Mühlemann
+//     Backbone.CQRS may be freely distributed under the MIT license.
 
 (function(){
 
