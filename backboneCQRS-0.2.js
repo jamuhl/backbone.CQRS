@@ -15,9 +15,8 @@
     var Backbone = root.Backbone;
     Backbone.CQRS = {};
 
-    // Require Underscore, if we're on the server, and it's not already present.
+    // Shortcut to underscore
     var _ = root._;
-    if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
 
     // For Backbone's purposes, jQuery or Zepto owns the `$` variable.
     var $ = root.jQuery || root.Zepto;
@@ -34,7 +33,10 @@
         destroy: noop
     });
 
+    // event
     var Event = Backbone.CQRS.Message.extend({});
+
+    // command
     Backbone.CQRS.Command = Backbone.CQRS.Message.extend({
         emit: function() {
             Backbone.CQRS.hub.emit(Backbone.CQRS.hub.commandsChannel, this.parse(this.toJSON()));
@@ -78,7 +80,11 @@
 
                 this.commandsChannel = options.commandsChannel;
 
+                // forward incoming events to eventHandler by emitting it to 
+                // dispatchEvent -> eventHandler is bound to this 'channel'
                 this.on(options.eventsChannel, function(msg) {              
+                    
+                    // create an event object and set parsed message attributes
                     var evt = new Event();
                     evt.set(this.parseEvent(msg));
 
@@ -87,6 +93,7 @@
                     evt.id = dive(attrs, options.eventModelIdAttr);
                     evt.cmdId = self.getCommandId(attrs, options.eventResponseToCommandId);
                     
+                    // emit it -> forward to eventHandler
                     this.emit('dispatchEvent', evt);
                 });
             }
@@ -112,6 +119,7 @@
     hub.on = hub.bind;
     hub.emit = hub.trigger;
 
+
     // EventDenormalizer
     // --------------
 
@@ -135,16 +143,21 @@
         // initialization logic.
         initialize : noop,
 
+        // will be called by Backbone.CQRS.eventHandler 
+        // models can listen to this event via myModel.bindCQRS()
         handle: function(evt) {
             if (evt.id) {
                 this.trigger('change:' + evt.id, this.parse(evt), this.apply);
             }
         },
 
+        // as the denormalizer is for a specific model it can provide an 
+        // apply function for the model
         apply: function(data, model) {
             model.set(data);
         },
 
+        // get the needed part from event to apply to model
         parse: function(evt) {
             if (this.defaultPayloadValue) {
                 return dive(evt.toJSON(), this.defaultPayloadValue);
@@ -153,6 +166,8 @@
             } 
         },
 
+        // used to add denormalizer to Backbone.CQRS.eventHandler which forwards 
+        // event to specific denormalizers handle function
         register: function(forEvt, forMdl) {
             
             this.forEvent = forEvt || this.forEvent;
@@ -166,20 +181,24 @@
 
     Backbone.CQRS.EventDenormalizer.extend = Backbone.Model.extend;
 
+
     // Global EventHandler
     // -------------------
+
     var EventHandler = Backbone.CQRS.EventDenormalizer.extend({
         
         initialize: function() {
             this.denormalizers = [];
             this.observedCommands = [];
             
+            // subscribe on incoming events
             Backbone.CQRS.hub.on('dispatchEvent', function(evt) {
                 this.handle(evt);
             }, this);
 
         },
 
+        // get specific denormalizer for model or event type
         getDenormalizer: function(forEvent, forModel) {
             if (forEvent) {
                 return _(this.denormalizers).filter(function(r) {
@@ -194,15 +213,16 @@
             }
         },
 
+        // handles incoming events from hub
         handle: function(evt) {
-            // observing commands
+            // to observing commands
             var pending = this.getPendingCommand(evt);
             if (pending) {
                 pending.callback(evt);
                 this.removePendingCommand(pending);
             }
 
-            // denormalize
+            // to denormalizers
             var denorm = this.getDenormalizer(evt.name);
 
             _(denorm).each(function(d) {
@@ -210,6 +230,9 @@
             });
         },
 
+        // a model can bind to events via ev = 'modelName:id' 
+        // this will happen on myModel.bindCQRS()
+        // the binding is forwarded to matching denormalizers
         bind: function(ev, callback, context) {
             if (ev.indexOf(':') < 0) return false;
 
@@ -238,6 +261,9 @@
             });
         },
 
+        // add command to observe
+        // in the handle function an event matching the command will 
+        // call the provided callback
         observe: function(cmdId, callback) {
             this.observedCommands.push({id: cmdId, callback: callback});
         },
@@ -259,15 +285,18 @@
 
     });
 
+    // create one instace of this global handler
     Backbone.CQRS.eventHandler = new EventHandler();
+
 
     // Extend Backbone.Model
     // ---------------------
 
     Backbone.Model = Backbone.Model.extend({
         
-        modelName: null, // you must set this or provie val on bindCQRS
+        modelName: null, // you should set this in your model or provide val on bindCQRS
 
+        // just an easier shortcut to Backbone.CQRS.eventHandler.bind
         bindCQRS: function(modelName) {
             if (modelName) this.modelName = modelName;
             if (!this.modelName) return;
@@ -284,6 +313,10 @@
             Backbone.CQRS.eventHandler.unbind(this.modelName + ':' + id, this.apply, this);
         },
 
+        // will call the provided function with the data from denormalizer 
+        // so you can have denormalizing functionality capsulated in denormalizer
+        // override this with you function if needed just be aware all matching 
+        // events (eg. personCreated, personChange) will call the same function
         apply: function(data, funct) {
             funct.apply(this, [data, this]);
         }
