@@ -266,14 +266,14 @@
 
     Backbone.Model = Backbone.Model.extend({
         
-        modelName: null, // you must set this
+        modelName: null, // you must set this or provie val on bindCQRS
 
         bindCQRS: function(modelName) {
             if (modelName) this.modelName = modelName;
             if (!this.modelName) return;
             var id = this.id || this.cid;
 
-            Backbone.CQRS.eventHandler.bind(this.modelName + ':' + id, this.apply);
+            Backbone.CQRS.eventHandler.bind(this.modelName + ':' + id, this.apply, this);
         },
 
         unbindCQRS: function(modelName) {
@@ -281,11 +281,11 @@
             if (!this.modelName) return;
             var id = this.id || this.cid;
 
-            Backbone.CQRS.eventHandler.unbind(this.modelName + ':' + id, this.apply);
+            Backbone.CQRS.eventHandler.unbind(this.modelName + ':' + id, this.apply, this);
         },
 
-        apply: function(data, funct) { 
-            funct.apply(this, data, this);
+        apply: function(data, funct) {
+            funct.apply(this, [data, this]);
         }
 
     });
