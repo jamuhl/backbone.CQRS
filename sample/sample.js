@@ -259,6 +259,8 @@
     var app = {};
     var init = function() {
         app.persons = new Persons([
+            // in a real app you would app.persons.fetch() and grab 
+            // the data via sync from server
             {personname: 'Tim', id: _.uniqueId('p')},
             {personname: 'Ida', id: _.uniqueId('p')},
             {personname: 'Rob', id: _.uniqueId('p')}
