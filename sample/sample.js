@@ -23,7 +23,10 @@
     // Wire up communication to/from server
     // ------------------------------------
     //
-    // as we work on clientside we just push back the received commands 
+    // as we work clientside only we just push back the received commands 
+    //
+    // HINT: you should pass cmds to server and forward events from server 
+    //       via websockets, flash, ...
     Backbone.CQRS.hub.on('commands', function(cmd) {
         var evt = cmd;
 
