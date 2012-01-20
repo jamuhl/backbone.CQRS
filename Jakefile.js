@@ -8,7 +8,7 @@ task('build', [], function(debug) {
     
     // a basic smoosh configuration object
     smoosh.config({
-      "VERSION": "0.1",
+      "VERSION": "0.2",
       "JAVASCRIPT": {
         "DIST_DIR": "./",
         "backboneCQRS": [

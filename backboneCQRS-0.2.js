@@ -1,8 +1,6 @@
-//     Backbone.js 0.5.3
-//     (c) 2010 Jeremy Ashkenas, DocumentCloud Inc.
-//     Backbone may be freely distributed under the MIT license.
-//     For all details and documentation:
-//     http://documentcloud.github.com/backbone
+//     Backbone.CQRS.js
+//     (c) 2012 Jan Mühlemann
+//     Backbone.CQRS may be freely distributed under the MIT license.
 
 (function(){
 
@@ -131,18 +129,28 @@
     // Set up all inheritable **Backbone.Router** properties and methods.
     _.extend(Backbone.CQRS.EventDenormalizer.prototype, Backbone.Events, {
 
+        defaultPayloadValue: 'payload',
+
         // Initialize is an empty function by default. Override it with your own
         // initialization logic.
         initialize : noop,
 
         handle: function(evt) {
             if (evt.id) {
-                this.trigger('change:' + evt.id, this.parse(evt));
+                this.trigger('change:' + evt.id, this.parse(evt), this.apply);
             }
         },
 
+        apply: function(data, model) {
+            model.set(data);
+        },
+
         parse: function(evt) {
-            return evt;
+            if (this.defaultPayloadValue) {
+                return dive(evt.toJSON(), this.defaultPayloadValue);
+            } else {
+                return evt.toJSON();
+            } 
         },
 
         register: function(forEvt, forMdl) {
@@ -276,8 +284,8 @@
             Backbone.CQRS.eventHandler.unbind(this.modelName + ':' + id, this.apply);
         },
 
-        apply: function(data) { 
-            this.set(data);
+        apply: function(data, funct) { 
+            funct.apply(this, data, this);
         }
 
     });

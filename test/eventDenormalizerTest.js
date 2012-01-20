@@ -64,11 +64,9 @@ asyncTest("Pass event through denormalizer to model", function() {
         
         initialize: function() {
             
-            Backbone.CQRS.eventHandler.bind('myModel:4', function(evt) {
-                equals(evt.name, 'myEvent4', 'get eventName');
-                equals(evt.id, '4', 'get model id');
-                equals(evt.get('name'), 'myEvent4', 'get eventName from attr');
-                equals(evt.get('payload').project, 'Backbone.CQRS', 'get value from payload');
+            Backbone.CQRS.eventHandler.bind('myModel:4', function(data) {
+                equals(data.id, '4', 'get model id');
+                equals(data.project, 'Backbone.CQRS', 'get value from payload');
 
                 start();
             });
@@ -94,14 +92,9 @@ asyncTest("Pass event through denormalizer to cqrs extended model", function() {
     var myModel = Backbone.Model.extend({
         
         apply: function(data) {
-            
-            equals(data.name, 'myEvent5', 'get eventName');
             equals(data.id, '5', 'get model id');
-            equals(data.get('name'), 'myEvent5', 'get eventName from attr');
-            equals(data.get('payload').project, 'Backbone.CQRS', 'get value from payload');
-
+            equals(data.project, 'Backbone.CQRS', 'get value from payload');
             start();
-
         }
 
     });

@@ -9,7 +9,7 @@ To use CQRS on the clientside and inside Backbone.js we will need to push _event
 to the browser. You can achieve this via websockets, flash, long polling or any 
 other technique around.
 
-## Initialization
+## INITIALIZATION
 
 To configure Backbone.CQRS you got to init the `Backbone.CQRS.hub`.
 
@@ -50,7 +50,7 @@ You can override a few values on initialisation:
 	});
 
 
-## Wire up commands and events to/from sever
+### Wire up commands and events to/from sever
 
 The interface to Backbone.CQRS is provided through `Backbone.CQRS.hub`:
 
@@ -64,35 +64,9 @@ The interface to Backbone.CQRS is provided through `Backbone.CQRS.hub`:
 		mySocket.emit('commands', data);
 	});
 
-## Denormalize event data to you model
+## EVENT HANDLING
 
-First create a denormalizer:
-
-    var personCreatedHandler = new Backbone.CQRS.EventDenormalizer({
-        forModel: 'person',
-        forEvent: 'personChanged'
-    });
-
-    var person = Backbone.Model.extend({modelName: 'person'});
-
-    var me = new person({id: '1'});
-    me.bindCQRS();
-
-all _personChanged_ events for id = 1 will be applied to the personModel by simply 
-set the event data to the model. You could override the apply function like this to 
-get more control:
-
-	var person = Backbone.Model.extend({
-
-		modelName: 'person',
-
-        apply: function(data) {
-        	if (data.name === 'personChanged') {
-        		this.set(data.payload);
-        	}
-
-        }
-	});
+### Denormalize _create_ events which not yet have a model
 
 For creational events which aren't applied to an existing model you could 
 override the _handle_ function in the eventdenormalizer:
@@ -110,7 +84,122 @@ override the _handle_ function in the eventdenormalizer:
         forEvent: 'personCreated'
     });
 
-## send commands
+### Denormalize event data to matching model
+
+First create a denormalizer:
+
+    var personCreatedHandler = new Backbone.CQRS.EventDenormalizer({
+        forModel: 'person',
+        forEvent: 'personChanged'
+    });
+
+    var person = Backbone.Model.extend({modelName: 'person'});
+
+    var me = new person({id: '1'});
+    me.bindCQRS();
+
+all _personChanged_ events payload attributes for id = 1 will be applied to the personModel by simply 
+set the event data to the model. 
+
+You could change this behavior by:
+
+#### 1) change the attribute for data
+
+By default Backbone.CQRS will apply `event.payload` to model.
+
+    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+        defaultPayloadValue: 'myAttribute' // or 'myAttribute.child1.child2' if it's nested
+    });
+
+    var personCreatedHandler = new PersonCreateDenormalizer({
+        forModel: 'person',
+        forEvent: 'personChanged'
+    });
+
+#### 2) override the parse function
+
+    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+        
+        parse: function(evt) {
+            
+            // evt is a Backbone.CQRS.Event (extending model) so:
+            var data = evt.toJSON();
+
+            return {
+                value1: data.myAttr.child,
+                value2: data.myAttr2.child.child
+                
+                //...  
+            };
+
+        }
+
+    });
+
+    var personCreatedHandler = new PersonCreateDenormalizer({
+        forModel: 'person',
+        forEvent: 'personChanged'
+    });
+
+#### 3) override the apply function in denormalizer
+
+    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+        
+        apply: function(data, model) {
+            model.set(data.payload.myAttr);
+        },
+
+        // optional override parse too
+        parse: function(evt) {   
+            // ...
+        }
+
+    });
+
+    var personCreatedHandler = new PersonCreateDenormalizer({
+        forModel: 'person',
+        forEvent: 'personChanged'
+    });
+
+This way you can control the apply function for the model inside of the eventdenormalizer.
+
+If you prefer to have the apply function inside you model you could override this 
+too, but be aware all events will be routed to the same apply function, so you will have to distinguish events inside your models apply function!
+
+You could override the apply function like this to 
+get more control:
+
+    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+        
+        parse: function(evt) {          
+            return evt; // return the pure event object
+        }
+
+    });
+
+    var personCreatedHandler = new PersonCreateDenormalizer({
+        forModel: 'person',
+        forEvent: 'personChanged'
+    });
+
+	var person = Backbone.Model.extend({
+
+		modelName: 'person',
+
+        apply: function(evt) {
+        	if (evt.name === 'personChanged') {
+        		this.set(evt.payload);
+        	}
+
+        }
+	});
+
+    var me = new person({id: '1'});
+    me.bindCQRS();
+
+## COMMAND HANDLING
+
+### send commands
 
 To send commands just:
 
@@ -124,6 +213,8 @@ To send commands just:
 
     // emit it
     cmd.emit();
+
+### observe commands
 
 if you want to react on events in respond to a command you can:
 
