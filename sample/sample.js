@@ -26,16 +26,18 @@
     // as we work clientside only we just push back the received commands 
     //
     // HINT: you should pass cmds to server and forward events from server 
-    //       via websockets, flash, ...
+    // ----- via websockets, flash, ...
     Backbone.CQRS.hub.on('commands', function(cmd) {
         var evt = cmd;
 
         // convert command to event
         if (evt.name === 'createPerson') {
             evt.name = 'personCreated';
-            evt.payload.id = _.uniqueId('p'); // add a id on 'serverside'
+            evt.payload.id = _.uniqueId('p'); // add a id on simulated 'serverside'
         } else if (evt.name === 'changePerson') {
             evt.name = 'personChanged';
+        } else if (evt.name === 'deletePerson') {
+            evt.name = 'personDeleted';
         }
 
         // send with some delay - better to see effect
@@ -49,7 +51,7 @@
     // Create a few EventDenormalizers
     // -------------------------------
 
-    // personCreated event (override defaults)
+    // personCreated event (override handle)
     var PersonCreateHandler = Backbone.CQRS.EventDenormalizer.extend({
 
         // bindings
@@ -71,6 +73,25 @@
         forEvent: 'personChanged'
     });
 
+    // personCreated event (override apply)
+    var PersonDeletedHandler = Backbone.CQRS.EventDenormalizer.extend({
+
+        // bindings
+        forModel: 'person',
+        forEvent: 'personDeleted',
+
+        // as the 'personDeleted' event destroys a model
+        // we override the apply function
+        apply: function(data, model) {
+            // unbind it
+            model.unbindCQRS();
+
+            // destroy it
+            model.destroy();
+        }
+    });
+    var personDeletedHandler = new PersonDeletedHandler();
+
 
 
     // Create Backbone Stuff
@@ -79,10 +100,18 @@
     // model
     var Person = Backbone.Model.extend({
         modelName: 'person', // so denormalizers can resolve events to model
+        
         initialize: function() {
             // bind this model to get event updates - a lot of magic ;)
             // not more to do the model gets updated now
             this.bindCQRS(); 
+        },
+
+        // as we don't have to sync the deletion to server as command already 
+        // took care of this we override the destroy function on model.
+        // HINT: best would be to override Backbone.sync to only support GET
+        destroy: function(options) {
+            this.trigger('destroy', this, this.collection, options);
         }
     });
 
@@ -92,7 +121,7 @@
     });
 
     // view and templates
-    var personItemTemplate = _.template('<%= personname %> <a class="editPerson" href="">edit</a>');
+    var personItemTemplate = _.template('<%= personname %> <a class="deletePerson" href="">delete</a> <a class="editPerson" href="">edit</a>');
     var personEditItemTemplate = _.template('<input id="name" type="text" value="<%= personname %>"></input><button id="changePerson">save</button>');
 
     var PersonItemView = Backbone.View.extend({
@@ -102,10 +131,12 @@
 
         initialize: function() {
             this.model.bind('change', this.render, this);
+            this.model.bind('destroy', this.remove, this);
         },
 
         events: {
             'click .editPerson' : 'uiEditPerson',
+            'click .deletePerson' : 'uiDeletePerson',
             'click #changePerson' : 'uiChangePerson'
         },
 
@@ -114,6 +145,22 @@
             e.preventDefault();
             this.model.editMode = true;
             this.render();
+        },
+
+        // send deletePerson command with id
+        uiDeletePerson: function(e) {
+            e.preventDefault();
+
+            // CQRS command
+            var cmd = new Backbone.CQRS.Command({
+                name: 'deletePerson',
+                payload: { 
+                    id: this.model.id
+                }
+            });
+
+            // emit it
+            cmd.emit();
         },
 
         // send changePerson command with new name
@@ -149,6 +196,10 @@
                 $(this.el).html(personItemTemplate(this.model.toJSON()));
             }
             return this;
+        }, 
+
+        remove: function() {
+            $(this.el).fadeOut('slow');
         }
 
     });
