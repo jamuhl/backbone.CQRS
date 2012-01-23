@@ -99,7 +99,7 @@ For advanced options for denormalizing look [here](file:///home/jan/Projects/bac
 To send commands just:
 
     var cmd = new Backbone.CQRS.Command({
-        commandName: 'changePerson',
+        name: 'changePerson',
         payload: {
             id: 8,
             name: 'my name'
