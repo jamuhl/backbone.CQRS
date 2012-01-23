@@ -345,9 +345,9 @@
 
     // Modified Backbone.Sync
     // ----------------------
-    Backbone.CQRS.sync = function(method, model, options) {
-        var origSync = Backbone.sync;
+    var origSync = Backbone.sync;
 
+    Backbone.CQRS.sync = function(method, model, options) {
         var type = methodMap[method];
 
         // __only change is here__ only allow get!
