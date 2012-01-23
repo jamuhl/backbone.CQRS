@@ -3,6 +3,30 @@
     // how long server will take to send a response?
     var delay = 1000;
 
+    // our app
+    var app = {};
+
+    // Backbone Model and Collection
+    // -----------------------------
+
+    // model
+    var Person = Backbone.Model.extend({
+        modelName: 'person', // so denormalizers can resolve events to model
+        
+        initialize: function() {
+            // bind this model to get event updates - a lot of magic ;)
+            // not more to do the model gets updated now
+            this.bindCQRS(); 
+        }
+    });
+
+    // collection
+    var Persons = Backbone.Collection.extend({
+        model: Person
+    });
+
+    var persons = new Persons();
+
     // Init Backbone.CQRS
     // ------------------
     //
@@ -53,21 +77,16 @@
     // Create a few EventDenormalizers
     // -------------------------------
 
-    // personCreated event (override handle)
-    var PersonCreateHandler = Backbone.CQRS.EventDenormalizer.extend({
+    // personCreated event (change methode to create and pass in model and collection to add it to
+    var personCreateHandler = new Backbone.CQRS.EventDenormalizer({
+        methode: 'create',
+        model: Person,
+        collection: persons,
 
         // bindings
         forModel: 'person',
-        forEvent: 'personCreated',
-
-        // as the 'personCreated' event creates a new model
-        // we override the handle function
-        handle: function(evt) {
-            var person = new Person(evt.get('payload'));
-            app.persons.add(person);
-        }
+        forEvent: 'personCreated'
     });
-    var personCreateHandler = new PersonCreateHandler();
 
     // personChanged event (just go with defaults)
     var personChangedHandler = new Backbone.CQRS.EventDenormalizer({
@@ -75,45 +94,19 @@
         forEvent: 'personChanged'
     });
 
-    // personCreated event (override apply)
-    var PersonDeletedHandler = Backbone.CQRS.EventDenormalizer.extend({
+    // personCreated event (just change methode to delete)
+    var personDeletedHandler = new Backbone.CQRS.EventDenormalizer({
+        methode: 'delete',
 
         // bindings
         forModel: 'person',
-        forEvent: 'personDeleted',
-
-        // as the 'personDeleted' event destroys a model
-        // we override the apply function
-        apply: function(data, model) {
-            // unbind it
-            model.unbindCQRS();
-
-            // destroy it
-            model.destroy();
-        }
+        forEvent: 'personDeleted'
     });
-    var personDeletedHandler = new PersonDeletedHandler();
-
 
 
     // Create Backbone Stuff
     // ---------------------
 
-    // model
-    var Person = Backbone.Model.extend({
-        modelName: 'person', // so denormalizers can resolve events to model
-        
-        initialize: function() {
-            // bind this model to get event updates - a lot of magic ;)
-            // not more to do the model gets updated now
-            this.bindCQRS(); 
-        }
-    });
-
-    // collection
-    var Persons = Backbone.Collection.extend({
-        model: Person
-    });
 
     // view and templates
     var personItemTemplate = _.template('<%= personname %> <a class="deletePerson" href="">delete</a> <a class="editPerson" href="">edit</a>');
@@ -250,17 +243,16 @@
 
     // Bootstrap Backbone
     // ------------------
-
-    var app = {};
     var init = function() {
-        app.persons = new Persons([
+        app.persons = persons;
+
+        app.persons.add([
             // in a real app you would app.persons.fetch() and grab 
             // the data via sync from server
             {personname: 'Tim', id: _.uniqueId('p')},
             {personname: 'Ida', id: _.uniqueId('p')},
             {personname: 'Rob', id: _.uniqueId('p')}
         ]);
-
 
         var indexView = new IndexView();
         indexView.render();

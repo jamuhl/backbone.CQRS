@@ -104,7 +104,29 @@ First create a denormalizer:
     me.bindCQRS();
 
 all _personChanged_ events payload attributes for id = 1 will be applied to the personModel by simply 
-set the event data to the model. 
+set the event data to the model.
+
+For events that create or delete a model you can create your denormalizer like this:
+
+    // personCreated event
+    var personCreateHandler = new Backbone.CQRS.EventDenormalizer({
+        methode: 'create',     // change methode to create
+        model: Person,         // pass in model you want create with eventdata
+        collection: persons,   // pass in collection you want to add your model to
+
+        // bindings
+        forModel: 'person',
+        forEvent: 'personCreated'
+    });
+
+    // personCreated event
+    var personDeletedHandler = new Backbone.CQRS.EventDenormalizer({
+        methode: 'delete', // change methode to delete (will call unbindCQRS and destroy on model)
+
+        // bindings
+        forModel: 'person',
+        forEvent: 'personDeleted'
+    });
 
 You could change this behavior by:
 
