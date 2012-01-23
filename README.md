@@ -71,10 +71,11 @@ The interface to Backbone.CQRS is provided through `Backbone.CQRS.hub`:
 
 ## EVENT HANDLING
 
-### Denormalize event data to matching model
+### Denormalize event data
 
 First create a denormalizer:
 
+    // personChange event
     var personCreatedHandler = new Backbone.CQRS.EventDenormalizer({
         forModel: 'person',
         forEvent: 'personChanged'
@@ -172,6 +173,8 @@ By default Backbone.CQRS will apply `event.payload` to model.
 
 This way you can control the apply function for the model inside of the eventdenormalizer.
 
+#### 4) override apply function in your model
+
 If you prefer to have the apply function inside you model you could override this 
 too, but be aware all events will be routed to the same apply function, so you will have to distinguish events inside your models apply function!
 
@@ -206,7 +209,7 @@ get more control:
     var me = new person({id: '1'});
     me.bindCQRS();
 
-#### 4) override handle function in denormalizer
+#### 5) override handle function in denormalizer
 
 For creational events which aren't applied to an existing model you could 
 override the _handle_ function in the eventdenormalizer:
