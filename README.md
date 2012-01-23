@@ -71,24 +71,6 @@ The interface to Backbone.CQRS is provided through `Backbone.CQRS.hub`:
 
 ## EVENT HANDLING
 
-### Denormalize _create_ events which not yet have a model
-
-For creational events which aren't applied to an existing model you could 
-override the _handle_ function in the eventdenormalizer:
-
-    var PersonCreateHandler = Backbone.CQRS.EventDenormalizer.extend({
-        handle: function(evt) {
-            // do something
-            var person = new person(evt.get('payload'));
-            app.persons.add(person);
-        }
-    });
-
-    var personCreateHandler = new PersonCreateHandler({
-        forModel: 'person',
-        forEvent: 'personCreated'
-    });
-
 ### Denormalize event data to matching model
 
 First create a denormalizer:
@@ -106,7 +88,7 @@ First create a denormalizer:
 all _personChanged_ events payload attributes for id = 1 will be applied to the personModel by simply 
 set the event data to the model.
 
-For events that create or delete a model you can create your denormalizer like this:
+For events that _create_ or _delete_ a model you can create your denormalizer like this:
 
     // personCreated event
     var personCreateHandler = new Backbone.CQRS.EventDenormalizer({
@@ -119,7 +101,7 @@ For events that create or delete a model you can create your denormalizer like t
         forEvent: 'personCreated'
     });
 
-    // personCreated event
+    // personDeleted event
     var personDeletedHandler = new Backbone.CQRS.EventDenormalizer({
         methode: 'delete', // change methode to delete (will call unbindCQRS and destroy on model)
 
@@ -193,7 +175,7 @@ This way you can control the apply function for the model inside of the eventden
 If you prefer to have the apply function inside you model you could override this 
 too, but be aware all events will be routed to the same apply function, so you will have to distinguish events inside your models apply function!
 
-You could override the apply function like this to 
+You could override the apply function in your model like this to 
 get more control:
 
     var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
@@ -223,6 +205,22 @@ get more control:
 
     var me = new person({id: '1'});
     me.bindCQRS();
+
+#### 4) override handle function in denormalizer
+
+For creational events which aren't applied to an existing model you could 
+override the _handle_ function in the eventdenormalizer:
+
+    var PersonSpecialHandler = Backbone.CQRS.EventDenormalizer.extend({
+        handle: function(evt) {
+            // do something
+        }
+    });
+
+    var personSpecialHandler = new PersonCreateHandler({
+        forModel: 'person',
+        forEvent: 'personCreated'
+    });
 
 ## COMMAND HANDLING
 
