@@ -226,7 +226,7 @@ override the _handle_ function in the eventdenormalizer:
 To send commands just:
 
     var cmd = new Backbone.CQRS.Command({
-        commandName: 'changePerson',
+        name: 'changePerson',
         payload: {
             id: 8,
             name: 'my name'
@@ -241,7 +241,8 @@ To send commands just:
 if you want to react on events in respond to a command you can:
 
     var cmd = new Backbone.CQRS.Command({
-        commandName: 'changePerson',
+        name: 'changePerson',
+        commandId: 'someUniqueId', // bring this back in event to resolve it!
         payload: {
             id: 8,
             name: 'my name'
