@@ -7,6 +7,11 @@ To use CQRS on the clientside and inside Backbone.js we will need to push _event
 to the browser. You can achieve this via websockets, flash, long polling or any 
 other technique around.
 
+# Download
+
+<section id="download"> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.4.zip">backbone.CQRS v0.4</a> 
+</section>
 
 # INITIALIZATION
 
