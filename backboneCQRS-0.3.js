@@ -322,22 +322,6 @@
 
     });
 
-
-    // Modified Backbone.Sync
-    // ----------------------
-    Backbone.CQRS.sync = function(method, model, options) {
-        var origSync = Backbone.sync;
-
-        var type = methodMap[method];
-
-        // __only change is here__ only allow get!
-        if (type !== 'GET') {
-            return options.success();
-        } else {
-            origSync(method, model, options);
-        }
-    };
-
     // Functions
     // ---------
 
@@ -350,14 +334,6 @@
             x++;
         }
         return value;
-    };
-
-    // Mappings from backbone to server methode.
-    var methodMap = {
-     'create': 'POST',
-     'update': 'PUT',
-     'delete': 'DELETE',
-     'read': 'GET'
     };
 
 

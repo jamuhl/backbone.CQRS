@@ -18,6 +18,8 @@
     // we can just init it:
     Backbone.CQRS.hub.init();
 
+    // override Backbone.sync with CQRS.sync which allows only GET method
+    Backbone.sync = Backbone.CQRS.sync;
 
 
     // Wire up communication to/from server
@@ -105,13 +107,6 @@
             // bind this model to get event updates - a lot of magic ;)
             // not more to do the model gets updated now
             this.bindCQRS(); 
-        },
-
-        // as we don't have to sync the deletion to server as command already 
-        // took care of this we override the destroy function on model.
-        // HINT: best would be to override Backbone.sync to only support GET
-        destroy: function(options) {
-            this.trigger('destroy', this, this.collection, options);
         }
     });
 
