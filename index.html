@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>backbone.CQRS</title>
+        <link rel='stylesheet' href='public/css/main.css' type='text/css' media='all' />
+        <link rel="stylesheet" href="public/css/prettify.css" type="text/css" />
+        <link rel="stylesheet" href="public/css/flexible-nav.min.css" type="text/css" />
+        <script type="text/javascript" src="public/js/jquery-1.6.4.min.js"></script>
+        <script type="text/javascript" src="public/js/prettify.js"></script>
+        <script type="text/javascript" src="public/js/flexible-nav.min.js"></script>
+</head>
+
+<body>
+
+<div id="forkme">
+    <a href="https://github.com/jamuhl/backbone.CQRS"><img src="public/img/gihub_ribbon.png"></a>
+</div>
+
+<header>
+    <a href="">
+        <h2>backbone</h2>
+        <h1 id="title" style="display: none;">.CQRS</h1>
+        <h2 id="subtitle" style="display: none;">impliyfied</h2>
+    </a>
+</header>
+
+<section id='content'>
+
+<h1>Introduction</h1>
+
+<p>Project goal is to simplify the usage of the CQRS Pattern under backbone.js by 
+providing needed infrastructure.</p>
+
+<p>To use CQRS on the clientside and inside Backbone.js we will need to push <em>events</em> 
+to the browser. You can achieve this via websockets, flash, long polling or any 
+other technique around.</p>
+
+<h1>INITIALIZATION</h1>
+
+<p>To configure Backbone.CQRS you got to init the <code>Backbone.CQRS.hub</code>.</p>
+
+<pre><code><span class="com">// given your events look something like this</span><span class="pln"><br /></span><span class="kwd">var</span><span class="pln"> </span><span class="kwd">event</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; name</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pun">,</span><span class="pln"> </span><span class="com">// the unique name of this event</span><span class="pln"><br />&nbsp; &nbsp; payload</span><span class="pun">:</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; id</span><span class="pun">:</span><span class="pln"> </span><span class="str">'someId'</span><span class="pun">,</span><span class="pln"> </span><span class="com">// the provided id should match the Backbone.Model.Id</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; anotherValue</span><span class="pun">:</span><span class="pln"> </span><span class="str">'something'</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"> &nbsp; <br /></span><span class="pun">};</span><span class="pln"><br /><br /></span><span class="com">// you can go with defaults</span><span class="pln"><br /></span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="pln">hub</span><span class="pun">.</span><span class="pln">init</span><span class="pun">();</span><span class="pln"><br /></span></code></pre>
+
+<p>You can override a few values on initialisation:</p>
+
+<pre><code><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="pln">hub</span><span class="pun">.</span><span class="pln">init</span><span class="pun">({</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// messageing channels</span><span class="pln"><br />&nbsp; &nbsp; commandsChannel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'commands'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; eventsChannel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'events'</span><span class="pun">,</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// field lookup</span><span class="pln"><br />&nbsp; &nbsp; eventNameAttr</span><span class="pun">:</span><span class="pln"> </span><span class="str">'name'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; eventModelIdAttr</span><span class="pun">:</span><span class="pln"> </span><span class="str">'payload.id'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; eventResponseToCommandId</span><span class="pun">:</span><span class="pln"> </span><span class="str">'commandId'</span><span class="pun">,</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// override the default parse</span><span class="pln"><br />&nbsp; &nbsp; parseEvent</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">msg</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">var</span><span class="pln"> data </span><span class="pun">=</span><span class="pln"> JSON</span><span class="pun">.</span><span class="pln">parse</span><span class="pun">(</span><span class="pln">msg</span><span class="pun">);</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">return</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; name</span><span class="pun">:</span><span class="pln"> data</span><span class="pun">.</span><span class="pln">eventName</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; payload</span><span class="pun">:</span><span class="pln"> data</span><span class="pun">.</span><span class="pln">payload</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; commandId</span><span class="pun">:</span><span class="pln"> data</span><span class="pun">.</span><span class="pln">commandId<br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="pun">};</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h3>Wire up commands and events to/from sever</h3>
+
+<p>The interface to Backbone.CQRS is provided through <code>Backbone.CQRS.hub</code>:</p>
+
+<pre><code><span class="com">// pass in events from your socket</span><span class="pln"><br />mySocket</span><span class="pun">.</span><span class="pln">on</span><span class="pun">(</span><span class="str">'events'</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">data</span><span class="pun">){</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="pln">hub</span><span class="pun">.</span><span class="pln">emit</span><span class="pun">(</span><span class="str">'events'</span><span class="pun">,</span><span class="pln"> data</span><span class="pun">);</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// pass commands to socket</span><span class="pln"><br /></span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="pln">hub</span><span class="pun">.</span><span class="pln">on</span><span class="pun">(</span><span class="str">'commands'</span><span class="pun">,</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">data</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; mySocket</span><span class="pun">.</span><span class="pln">emit</span><span class="pun">(</span><span class="str">'commands'</span><span class="pun">,</span><span class="pln"> data</span><span class="pun">);</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h1>EVENT HANDLING</h1>
+
+<h3>Denormalize event data</h3>
+
+<p>First create a denormalizer:</p>
+
+<pre><code><span class="com">// personChange event</span><span class="pln"><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> person </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="typ">Model</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln">modelName</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> me </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> person</span><span class="pun">({</span><span class="pln">id</span><span class="pun">:</span><span class="pln"> </span><span class="str">'1'</span><span class="pun">});</span><span class="pln"><br />me</span><span class="pun">.</span><span class="pln">bindCQRS</span><span class="pun">();</span><span class="pln"><br /></span></code></pre>
+
+<p>all <em>personChanged</em> events payload attributes for id = 1 will be applied to the personModel by simply 
+set the event data to the model.</p>
+
+<p>For events that <em>create</em> or <em>delete</em> a model you can create your denormalizer like this:</p>
+
+<pre><code><span class="com">// personCreated event</span><span class="pln"><br /></span><span class="kwd">var</span><span class="pln"> personCreateHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; methode</span><span class="pun">:</span><span class="pln"> </span><span class="str">'create'</span><span class="pun">,</span><span class="pln"> &nbsp; &nbsp; </span><span class="com">// change methode to create</span><span class="pln"><br />&nbsp; &nbsp; model</span><span class="pun">:</span><span class="pln"> </span><span class="typ">Person</span><span class="pun">,</span><span class="pln"> &nbsp; &nbsp; &nbsp; &nbsp; </span><span class="com">// pass in model you want create with eventdata</span><span class="pln"><br />&nbsp; &nbsp; collection</span><span class="pun">:</span><span class="pln"> persons</span><span class="pun">,</span><span class="pln"> &nbsp; </span><span class="com">// pass in collection you want to add your model to</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// bindings</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personCreated'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// personDeleted event</span><span class="pln"><br /></span><span class="kwd">var</span><span class="pln"> personDeletedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; methode</span><span class="pun">:</span><span class="pln"> </span><span class="str">'delete'</span><span class="pun">,</span><span class="pln"> </span><span class="com">// change methode to delete (will call unbindCQRS and destroy on model)</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// bindings</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personDeleted'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h3>Advanced options for denormalization</h3>
+
+<h4>1) change the attribute for data</h4>
+
+<p>By default Backbone.CQRS will apply <code>event.payload</code> to model.</p>
+
+<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; defaultPayloadValue</span><span class="pun">:</span><span class="pln"> </span><span class="str">'myAttribute'</span><span class="pln"> </span><span class="com">// or 'myAttribute.child1.child2' if it's nested</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h4>2) override the parse function</h4>
+
+<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br /><br />&nbsp; &nbsp; parse</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">evt</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br /><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="com">// evt is a Backbone.CQRS.Event (extending model) so:</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">var</span><span class="pln"> data </span><span class="pun">=</span><span class="pln"> evt</span><span class="pun">.</span><span class="pln">toJSON</span><span class="pun">();</span><span class="pln"><br /><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">return</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; value1</span><span class="pun">:</span><span class="pln"> data</span><span class="pun">.</span><span class="pln">myAttr</span><span class="pun">.</span><span class="pln">child</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; value2</span><span class="pun">:</span><span class="pln"> data</span><span class="pun">.</span><span class="pln">myAttr2</span><span class="pun">.</span><span class="pln">child</span><span class="pun">.</span><span class="pln">child<br /><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span><span class="com">//... &nbsp;</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="pun">};</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h4>3) override the apply function in denormalizer</h4>
+
+<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br /><br />&nbsp; &nbsp; apply</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">data</span><span class="pun">,</span><span class="pln"> model</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; model</span><span class="pun">.</span><span class="kwd">set</span><span class="pun">(</span><span class="pln">data</span><span class="pun">.</span><span class="pln">payload</span><span class="pun">.</span><span class="pln">myAttr</span><span class="pun">);</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">},</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// optional override parse too</span><span class="pln"><br />&nbsp; &nbsp; parse</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">evt</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"> &nbsp; <br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="com">// ...</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<p>This way you can control the apply function for the model inside of the eventdenormalizer.</p>
+
+<h4>4) override apply function in your model</h4>
+
+<p>If you prefer to have the apply function inside you model you could override this 
+too, but be aware all events will be routed to the same apply function, so you will have to distinguish events inside your models apply function!</p>
+
+<p>You could override the apply function in your model like this to 
+get more control:</p>
+
+<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br /><br />&nbsp; &nbsp; parse</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">evt</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">return</span><span class="pln"> evt</span><span class="pun">;</span><span class="pln"> </span><span class="com">// return the pure event object</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreateDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> person </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="typ">Model</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br /><br />&nbsp; &nbsp; modelName</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br /><br />&nbsp; &nbsp; apply</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">evt</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">if</span><span class="pln"> </span><span class="pun">(</span><span class="pln">evt</span><span class="pun">.</span><span class="pln">name </span><span class="pun">===</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">this</span><span class="pun">.</span><span class="kwd">set</span><span class="pun">(</span><span class="pln">evt</span><span class="pun">.</span><span class="pln">payload</span><span class="pun">);</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> me </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> person</span><span class="pun">({</span><span class="pln">id</span><span class="pun">:</span><span class="pln"> </span><span class="str">'1'</span><span class="pun">});</span><span class="pln"><br />me</span><span class="pun">.</span><span class="pln">bindCQRS</span><span class="pun">();</span><span class="pln"><br /></span></code></pre>
+
+<h4>5) override handle function in denormalizer</h4>
+
+<p>For creational events which aren't applied to an existing model you could 
+override the <em>handle</em> function in the eventdenormalizer:</p>
+
+<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonSpecialHandler</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; handle</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">evt</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="com">// do something</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personSpecialHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreateHandler</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personCreated'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h1>COMMAND HANDLING</h1>
+
+<h3>send commands</h3>
+
+<p>To send commands just:</p>
+
+<pre><code><span class="kwd">var</span><span class="pln"> cmd </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">Command</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; commandName</span><span class="pun">:</span><span class="pln"> </span><span class="str">'changePerson'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; payload</span><span class="pun">:</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; id</span><span class="pun">:</span><span class="pln"> </span><span class="lit">8</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; name</span><span class="pun">:</span><span class="pln"> </span><span class="str">'my name'</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// emit it</span><span class="pln"><br />cmd</span><span class="pun">.</span><span class="pln">emit</span><span class="pun">();</span><span class="pln"><br /></span></code></pre>
+
+<h3>observe commands</h3>
+
+<p>if you want to react on events in respond to a command you can:</p>
+
+<pre><code><span class="kwd">var</span><span class="pln"> cmd </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">Command</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; commandName</span><span class="pun">:</span><span class="pln"> </span><span class="str">'changePerson'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; payload</span><span class="pun">:</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; id</span><span class="pun">:</span><span class="pln"> </span><span class="lit">8</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; name</span><span class="pun">:</span><span class="pln"> </span><span class="str">'my name'</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// observe it</span><span class="pln"><br />cmd</span><span class="pun">.</span><span class="pln">observe</span><span class="pun">(</span><span class="kwd">function</span><span class="pun">(</span><span class="kwd">event</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="com">// do something</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// emit it</span><span class="pln"><br />cmd</span><span class="pun">.</span><span class="pln">emit</span><span class="pun">();</span><span class="pln"><br /></span></code></pre>
+
+<p>By default backbone.CQRS will look for a field <code>commandId</code> in the event. You can 
+override this value or provide a own function to get the commandId in which the event 
+was send as response:</p>
+
+<pre><code><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="pln">hub</span><span class="pun">.</span><span class="pln">init</span><span class="pun">({</span><span class="pln"><br /><br />&nbsp; &nbsp; eventResponseToCommandId</span><span class="pun">:</span><span class="pln"> </span><span class="str">'commandId'</span><span class="pun">,</span><span class="pln"> </span><span class="com">// override with another value</span><span class="pln"><br /><br />&nbsp; &nbsp; </span><span class="com">// override the getCommandId function</span><span class="pln"><br />&nbsp; &nbsp; getCommandId</span><span class="pun">:</span><span class="pln"> </span><span class="kwd">function</span><span class="pun">(</span><span class="pln">data</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; </span><span class="kwd">return</span><span class="pln"> data</span><span class="pun">.</span><span class="pln">msgId</span><span class="pun">.</span><span class="pln">substring</span><span class="pun">(</span><span class="lit">0</span><span class="pun">,</span><span class="pln"> msg</span><span class="pun">.</span><span class="pln">indexOf</span><span class="pun">(</span><span class="str">'.'</span><span class="pun">));</span><span class="pln"> </span><span class="com">// or whatever</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+
+<h1>Samples</h1>
+
+<ul>
+<li><a href="https://github.com/jamuhl/backbone.CQRS/tree/master/sample">sample folder</a> A pure static sample</li>
+<li><a href="https://github.com/jamuhl/nodeCQRS">nodeCQRS</a> Sample implementation using socket.io</li>
+</ul>
+
+</section>
+
+<footer>
+        <p>Copyright 2012 Jan Mühlemann</p>
+</footer>
+
+
+<script type="text/javascript" >
+    $(window).load(function () {
+        $('#title').fadeIn(1000, function(){
+            $('#subtitle').fadeIn(2000);            
+        });
+
+        var nav = new FlexibleNavMaker('#content h1, #content h2, #content h3').make().prependTo('body');
+        new FlexibleNav(nav);
+        $(".flexible-nav").hide();
+    });
+
+    var fadeout = null;
+    window.onscroll = function() {
+        
+        clearTimeout(fadeout);
+                
+        $(".flexible-nav").fadeIn('slow')
+        
+        fadeout = setTimeout(outlineFadeOut,4000);
+    }
+    
+    var outlineFadeOut = function() {
+        $(".flexible-nav").fadeOut()
+    }
+
+</script>
+
+</body>
+
+</html>
