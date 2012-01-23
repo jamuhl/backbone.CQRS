@@ -11,7 +11,8 @@ other technique around.
 
 ### Or have a look at sample
 
-You can find it in the [sample folder](https://github.com/jamuhl/backbone.CQRS/tree/master/sample).
+- [sample folder](https://github.com/jamuhl/backbone.CQRS/tree/master/sample) A pure static sample
+- [nodeCQRS](https://github.com/jamuhl/nodeCQRS) Sample implementation using socket.io
 
 ## INITIALIZATION
 
