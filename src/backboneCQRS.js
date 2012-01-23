@@ -236,9 +236,8 @@
         bind: function(ev, callback, context) {
             if (ev.indexOf(':') < 0) return false;
 
-            var parts = ev.split(':'),
-                modelName = parts[0],
-                evtName = 'change:' + parts[1];
+            var modelName = ev.substring(0, ev.indexOf(':')),
+                evtName = 'change:' + ev.substring(ev.indexOf(':') + 1, ev.length);
             
             var denorm = this.getDenormalizer(null, modelName);
 
