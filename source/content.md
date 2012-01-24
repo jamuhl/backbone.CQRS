@@ -29,6 +29,8 @@ To configure Backbone.CQRS you got to init the `Backbone.CQRS.hub`.
     // you can go with defaults
     Backbone.CQRS.hub.init();
 
+<a name="init_options" />
+
 You can override a few values on initialisation:
 
     Backbone.CQRS.hub.init({
@@ -52,6 +54,15 @@ You can override a few values on initialisation:
             };
         }
     });
+
+#### override default Backbone.sync
+
+As you only want to GET models, collections from server and do all other operations (
+update, delete) via CQRS you can override Backbone.sync with Backbone.CQRS.sync, which will 
+only GET data from server and call success callback immediately for all other ops.
+
+    // override Backbone.sync with CQRS.sync which allows only GET method
+    Backbone.sync = Backbone.CQRS.sync;
 
 
 ### Wire up commands and events to/from sever
@@ -109,6 +120,8 @@ For events that _create_ or _delete_ a model you can create your denormalizer li
         forModel: 'person',
         forEvent: 'personDeleted'
     });
+
+<a name="adv_evt_denorm" />
 
 ### Advanced options for denormalization
 
@@ -240,6 +253,8 @@ To send commands just:
 
     // emit it
     cmd.emit();
+
+<a name="adv_cmd_observ" />
 
 ### observe commands
 
