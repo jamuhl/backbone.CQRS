@@ -29,8 +29,11 @@ To configure Backbone.CQRS you got to init the `Backbone.CQRS.hub`.
 
 	// you can go with defaults
 	Backbone.CQRS.hub.init();
+	
+	// override Backbone.sync with CQRS.sync which allows only GET method
+    	Backbone.sync = Backbone.CQRS.sync;
 
-There are a few options you can pass in on init. You find more information [here](file:///home/jan/Projects/backbone.CQRS/index.html#n2).
+There are a few options you can pass in on init. You find more information [here](http://jamuhl.github.com/backbone.CQRS/#init_options).
 
 
 ### Wire up commands and events to/from sever
@@ -89,7 +92,7 @@ For events that _create_ or _delete_ a model you can create your denormalizer li
         forEvent: 'personDeleted'
     });
 
-For advanced options for denormalizing look [here](file:///home/jan/Projects/backbone.CQRS/index.html#n6).
+For advanced options for denormalizing look [here](http://jamuhl.github.com/backbone.CQRS/#adv_evt_denorm).
 
 
 ## COMMAND HANDLING
@@ -109,7 +112,7 @@ To send commands just:
     // emit it
     cmd.emit();
 
-You can react on an event responding to a command. Find more information [here](file:///home/jan/Projects/backbone.CQRS/index.html#n9).
+You can react on an event responding to a command. Find more information [here](http://jamuhl.github.com/backbone.CQRS/#adv_cmd_observ).
 
 # License
 
