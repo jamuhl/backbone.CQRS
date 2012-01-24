@@ -10,7 +10,7 @@ other technique around.
 # Download
 
 <section id="download"> 
-    <a class="button" href="public/downloads/backbone.CQRS-0.4.zip">backbone.CQRS v0.4</a> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.4.1.zip">backbone.CQRS v0.4.1</a> 
 </section>
 
 # INITIALIZATION
@@ -102,10 +102,12 @@ set the event data to the model.
 For events that _create_ or _delete_ a model you can create your denormalizer like this:
 
     // personCreated event
-    var personCreateHandler = new Backbone.CQRS.EventDenormalizer({
+    var personCreatedHandler = new Backbone.CQRS.EventDenormalizer({
         methode: 'create',     // change methode to create
         model: Person,         // pass in model you want create with eventdata
-        collection: persons,   // pass in collection you want to add your model to
+        collection: persons,   // pass in collection 
+                               // or function returning collection you want to add to:
+                               // collection: function() { return my.not.yet.set.collection },
 
         // bindings
         forModel: 'person',
@@ -129,18 +131,18 @@ For events that _create_ or _delete_ a model you can create your denormalizer li
 
 By default Backbone.CQRS will apply `event.payload` to model.
 
-    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+    var PersonCreatedDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
         defaultPayloadValue: 'myAttribute' // or 'myAttribute.child1.child2' if it's nested
     });
 
-    var personCreatedHandler = new PersonCreateDenormalizer({
+    var personCreatedHandler = new PersonCreatedDenormalizer({
         forModel: 'person',
         forEvent: 'personChanged'
     });
 
 #### 2) override the parse function
 
-    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+    var PersonCreatedDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
         
         parse: function(evt) {
             
@@ -158,14 +160,14 @@ By default Backbone.CQRS will apply `event.payload` to model.
 
     });
 
-    var personCreatedHandler = new PersonCreateDenormalizer({
+    var personCreatedHandler = new PersonCreatedDenormalizer({
         forModel: 'person',
         forEvent: 'personChanged'
     });
 
 #### 3) override the apply function in denormalizer
 
-    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+    var PersonCreatedDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
         
         apply: function(data, model) {
             model.set(data.payload.myAttr);
@@ -178,7 +180,7 @@ By default Backbone.CQRS will apply `event.payload` to model.
 
     });
 
-    var personCreatedHandler = new PersonCreateDenormalizer({
+    var personCreatedHandler = new PersonCreatedDenormalizer({
         forModel: 'person',
         forEvent: 'personChanged'
     });
@@ -193,7 +195,7 @@ too, but be aware all events will be routed to the same apply function, so you w
 You could override the apply function in your model like this to 
 get more control:
 
-    var PersonCreateDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
+    var PersonCreatedDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
         
         parse: function(evt) {          
             return evt; // return the pure event object
@@ -201,7 +203,7 @@ get more control:
 
     });
 
-    var personCreatedHandler = new PersonCreateDenormalizer({
+    var personCreatedHandler = new PersonCreatedDenormalizer({
         forModel: 'person',
         forEvent: 'personChanged'
     });
@@ -232,7 +234,7 @@ override the _handle_ function in the eventdenormalizer:
         }
     });
 
-    var personSpecialHandler = new PersonCreateHandler({
+    var personSpecialHandler = new PersonSpecialHandler({
         forModel: 'person',
         forEvent: 'personCreated'
     });
@@ -287,7 +289,7 @@ was send as response:
 
         // override the getCommandId function
         getCommandId: function(data) {
-            return data.msgId.substring(0, msg.indexOf('.')); // or whatever
+            return data.msgId.substring(0, data.msgId.indexOf('.')); // or whatever
         }
     });
 
