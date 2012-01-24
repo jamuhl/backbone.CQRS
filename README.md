@@ -70,10 +70,10 @@ set the event data to the model.
 For events that _create_ or _delete_ a model you can create your denormalizer like this:
 
     // personCreated event
-    var personCreateHandler = new Backbone.CQRS.EventDenormalizer({
+    var personCreatedHandler = new Backbone.CQRS.EventDenormalizer({
         methode: 'create',     // change methode to create
         model: Person,         // pass in model you want create with eventdata
-        collection: persons,   // pass in collection you want to add your model to
+        collection: persons,   // pass in collection or function returning collection you want to add to
 
         // bindings
         forModel: 'person',

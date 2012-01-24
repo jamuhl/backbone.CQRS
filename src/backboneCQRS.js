@@ -155,7 +155,9 @@
                 }
             } else {
                 var mdl = new this.model(this.parse(evt));
-                this.collection.add(mdl);
+                var col = (typeof this.collection == 'function') ? this.collection() : this.collection;
+
+                if (col) col.add(mdl);
             }
         },
 
