@@ -31,7 +31,7 @@ To configure Backbone.CQRS you got to init the `Backbone.CQRS.hub`.
 	Backbone.CQRS.hub.init();
 	
 	// override Backbone.sync with CQRS.sync which allows only GET method
-    	Backbone.sync = Backbone.CQRS.sync;
+	Backbone.sync = Backbone.CQRS.sync;
 
 There are a few options you can pass in on init. You find more information [here](http://jamuhl.github.com/backbone.CQRS/#init_options).
 
