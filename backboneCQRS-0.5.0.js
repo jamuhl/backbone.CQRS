@@ -38,7 +38,9 @@
 
     // command
     Backbone.CQRS.Command = Backbone.CQRS.Message.extend({
-        emit: function() {
+        emit: function(callback) {
+            if (callback) this.observe(callback);
+
             Backbone.CQRS.hub.emit(Backbone.CQRS.hub.commandsChannel, this.parse(this.toJSON()));
         },
 
