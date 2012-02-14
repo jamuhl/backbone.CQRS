@@ -41,7 +41,7 @@ other technique around.</p>
 <h1>Download</h1>
 
 <p><section id="download"> 
-    <a class="button" href="public/downloads/backbone.CQRS-0.4.1.zip">backbone.CQRS v0.4.1</a> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.5.0.zip">backbone.CQRS v0.5.0</a> 
 </section></p>
 
 <h1>INITIALIZATION</h1>
@@ -138,6 +138,10 @@ override the <em>handle</em> function in the eventdenormalizer:</p>
 
 <pre><code><span class="kwd">var</span><span class="pln"> cmd </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">Command</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; name</span><span class="pun">:</span><span class="pln"> </span><span class="str">'changePerson'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; commandId</span><span class="pun">:</span><span class="pln"> </span><span class="str">'someUniqueId'</span><span class="pun">,</span><span class="pln"> </span><span class="com">// bring this back in event to resolve it!</span><span class="pln"><br />&nbsp; &nbsp; payload</span><span class="pun">:</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; id</span><span class="pun">:</span><span class="pln"> </span><span class="lit">8</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; &nbsp; &nbsp; name</span><span class="pun">:</span><span class="pln"> </span><span class="str">'my name'</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// observe it</span><span class="pln"><br />cmd</span><span class="pun">.</span><span class="pln">observe</span><span class="pun">(</span><span class="kwd">function</span><span class="pun">(</span><span class="kwd">event</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="com">// do something</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="com">// emit it</span><span class="pln"><br />cmd</span><span class="pun">.</span><span class="pln">emit</span><span class="pun">();</span><span class="pln"><br /></span></code></pre>
 
+<p>or just pass in the callback on emit:</p>
+
+<pre><code><span class="com">// emit it</span><span class="pln"><br />cmd</span><span class="pun">.</span><span class="pln">emit</span><span class="pun">(</span><span class="kwd">function</span><span class="pun">(</span><span class="kwd">event</span><span class="pun">)</span><span class="pln"> </span><span class="pun">{</span><span class="pln"><br />&nbsp; &nbsp; </span><span class="com">// do something</span><span class="pln"><br /></span><span class="pun">}););</span><span class="pln"><br /></span></code></pre>
+
 <p>By default backbone.CQRS will look for a field <code>commandId</code> in the event. You can 
 override this value or provide a own function to get the commandId in which the event 
 was send as response:</p>
@@ -149,6 +153,22 @@ was send as response:</p>
 <ul>
 <li><a href="https://github.com/jamuhl/backbone.CQRS/tree/master/sample">sample folder</a> A pure static sample</li>
 <li><a href="https://github.com/jamuhl/nodeCQRS">nodeCQRS</a> Sample implementation using socket.io</li>
+</ul>
+
+<h2>Release Notes</h2>
+
+<h3>v0.5.0</h3>
+
+<ul>
+<li>simplified observe of command</li>
+</ul>
+
+<h3>v0.4.1</h3>
+
+<ul>
+<li>tests </li>
+<li>samples</li>
+<li>basic event and command handling</li>
 </ul>
 
 </section>

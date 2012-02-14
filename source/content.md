@@ -10,7 +10,7 @@ other technique around.
 # Download
 
 <section id="download"> 
-    <a class="button" href="public/downloads/backbone.CQRS-0.4.1.zip">backbone.CQRS v0.4.1</a> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.5.0.zip">backbone.CQRS v0.5.0</a> 
 </section>
 
 # INITIALIZATION
@@ -279,6 +279,13 @@ if you want to react on events in respond to a command you can:
     // emit it
     cmd.emit();
 
+or just pass in the callback on emit:
+
+    // emit it
+    cmd.emit(function(event) {
+        // do something
+    }););
+
 By default backbone.CQRS will look for a field `commandId` in the event. You can 
 override this value or provide a own function to get the commandId in which the event 
 was send as response:
@@ -297,3 +304,16 @@ was send as response:
 
 - [sample folder](https://github.com/jamuhl/backbone.CQRS/tree/master/sample) A pure static sample
 - [nodeCQRS](https://github.com/jamuhl/nodeCQRS) Sample implementation using socket.io
+
+
+## Release Notes
+
+### v0.5.0
+
+- simplified observe of command
+
+### v0.4.1
+
+- tests 
+- samples
+- basic event and command handling
