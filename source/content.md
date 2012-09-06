@@ -309,6 +309,11 @@ was send as response:
 
 ## Release Notes
 
+### v0.5.5
+
+- customizable attribute lookup for model.id and model.data in eventdenormalizers
+- changed order: first denormalize than call observers for an event
+
 ### v0.5.0
 
 - simplified observe of command
