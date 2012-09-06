@@ -129,6 +129,9 @@
         options = options || {};
         if (options.forEvent) this.forEvent = options.forEvent;
         if (options.forModel) this.forModel = options.forModel;
+        if (options.payloadValue) this.payloadValue = options.payloadValue;
+        if (options.modelIdAttr) this.modelIdAttr = options.modelIdAttr;
+        if (options.onHandle) this.onHandle = options.onHandle;
         this.methode = options.methode || 'update';
         this.model = options.model;
         this.collection = options.collection;
@@ -152,20 +155,26 @@
         // models can listen to this event via myModel.bindCQRS()
         handle: function(evt) {
             if (this.methode !== 'create') {
-                if (evt.id) {
-                    this.trigger('change:' + evt.id, this.parse(evt), this.apply(this.methode));
+                var id = this.modelIdAttr ? dive(evt.toJSON(), this.modelIdAttr) : evt.id;
+                if (id) {
+                    this.trigger('change:' + id, this.parse(evt), this.apply(this.methode));
                 }
             } else {
-                var mdl = new this.model(this.parse(evt));
-                var col = (typeof this.collection == 'function') ? this.collection() : this.collection;
+                var col = (typeof this.collection == 'function') ? this.collection(evt) : this.collection;
 
-                if (col) col.add(mdl);
+                if (!col) return; 
+
+                var data = this.parse(evt);
+                col.add(data);
+                if (this.onHandle) this.onHandle(data, col.get(data.id));
             }
         },
 
         // as the denormalizer is for a specific model it can provide an 
         // apply function for the model
         apply: function(methode) {
+            var self = this;
+
             return function(data, model) {
                 if (methode === 'delete') {
                     // unbind it
@@ -173,16 +182,19 @@
 
                     // destroy it
                     model.destroy();
+                    if (self.onHandle) self.onHandle(data, model);
                 } else {
                     model.set(data);
+                    if (self.onHandle) self.onHandle(data, model);
                 }
             };
         },        
 
         // get the needed part from event to apply to model
         parse: function(evt) {
-            if (this.defaultPayloadValue) {
-                return dive(evt.toJSON(), this.defaultPayloadValue);
+            if (this.payloadValue || this.defaultPayloadValue) {
+                diveTo = this.payloadValue || this.defaultPayloadValue;
+                return dive(evt.toJSON(), diveTo);
             } else {
                 return evt.toJSON();
             } 
@@ -237,19 +249,19 @@
 
         // handles incoming events from hub
         handle: function(evt) {
-            // to observing commands
-            var pending = this.getPendingCommand(evt);
-            if (pending) {
-                pending.callback(evt);
-                this.removePendingCommand(pending);
-            }
-
             // to denormalizers
             var denorm = this.getDenormalizer(evt.name);
 
             _(denorm).each(function(d) {
                 d.handle(evt);
             });
+            
+            // to observing commands
+            var pending = this.getPendingCommand(evt);
+            if (pending) {
+                pending.callback(evt);
+                this.removePendingCommand(pending);
+            }
         },
 
         // a model can bind to events via ev = 'modelName:id' 
