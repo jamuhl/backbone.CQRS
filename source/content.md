@@ -10,7 +10,7 @@ other technique around.
 # Download
 
 <section id="download"> 
-    <a class="button" href="public/downloads/backbone.CQRS-0.5.0.zip">backbone.CQRS v0.5.0</a> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.5.5.zip">backbone.CQRS v0.5.5</a> 
 </section>
 
 # INITIALIZATION
@@ -127,12 +127,13 @@ For events that _create_ or _delete_ a model you can create your denormalizer li
 
 ### Advanced options for denormalization
 
-#### 1) change the attribute for data
+#### 1) change the attribute for model.id or data to set on model
 
 By default Backbone.CQRS will apply `event.payload` to model.
 
     var PersonCreatedDenormalizer = Backbone.CQRS.EventDenormalizer.extend({
-        defaultPayloadValue: 'myAttribute' // or 'myAttribute.child1.child2' if it's nested
+        payloadValue: 'payload.person' // payload person will be set on model instead of payload
+        modelIdAttr: 'payload.person.Id', // payload.person.id will be model's id instead of payload.id
     });
 
     var personCreatedHandler = new PersonCreatedDenormalizer({

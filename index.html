@@ -41,7 +41,7 @@ other technique around.</p>
 <h1>Download</h1>
 
 <p><section id="download"> 
-    <a class="button" href="public/downloads/backbone.CQRS-0.5.0.zip">backbone.CQRS v0.5.0</a> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.5.5.zip">backbone.CQRS v0.5.5</a> 
 </section></p>
 
 <h1>INITIALIZATION</h1>
@@ -89,11 +89,11 @@ set the event data to the model.</p>
 
 <h3>Advanced options for denormalization</h3>
 
-<h4>1) change the attribute for data</h4>
+<h4>1) change the attribute for model.id or data to set on model</h4>
 
 <p>By default Backbone.CQRS will apply <code>event.payload</code> to model.</p>
 
-<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonCreatedDenormalizer</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; defaultPayloadValue</span><span class="pun">:</span><span class="pln"> </span><span class="str">'myAttribute'</span><span class="pln"> </span><span class="com">// or 'myAttribute.child1.child2' if it's nested</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreatedDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
+<pre><code><span class="kwd">var</span><span class="pln"> </span><span class="typ">PersonCreatedDenormalizer</span><span class="pln"> </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Backbone</span><span class="pun">.</span><span class="pln">CQRS</span><span class="pun">.</span><span class="typ">EventDenormalizer</span><span class="pun">.</span><span class="pln">extend</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; payloadValue</span><span class="pun">:</span><span class="pln"> </span><span class="str">'payload.person'</span><span class="pln"> </span><span class="com">// payload person will be set on model instead of payload</span><span class="pln"><br />&nbsp; &nbsp; modelIdAttr</span><span class="pun">:</span><span class="pln"> </span><span class="str">'payload.person.Id'</span><span class="pun">,</span><span class="pln"> </span><span class="com">// payload.person.id will be model's id instead of payload.id</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /><br /></span><span class="kwd">var</span><span class="pln"> personCreatedHandler </span><span class="pun">=</span><span class="pln"> </span><span class="kwd">new</span><span class="pln"> </span><span class="typ">PersonCreatedDenormalizer</span><span class="pun">({</span><span class="pln"><br />&nbsp; &nbsp; forModel</span><span class="pun">:</span><span class="pln"> </span><span class="str">'person'</span><span class="pun">,</span><span class="pln"><br />&nbsp; &nbsp; forEvent</span><span class="pun">:</span><span class="pln"> </span><span class="str">'personChanged'</span><span class="pln"><br /></span><span class="pun">});</span><span class="pln"><br /></span></code></pre>
 
 <h4>2) override the parse function</h4>
 
