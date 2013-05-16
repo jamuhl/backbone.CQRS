@@ -153,9 +153,9 @@
 
         // will be called by Backbone.CQRS.eventHandler 
         // models can listen to this event via myModel.bindCQRS()
-        handle: function(evt) {
+        handle: function (evt) {
+            var id = this.modelIdAttr ? dive(evt.toJSON(), this.modelIdAttr) : evt.id;
             if (this.methode !== 'create') {
-                var id = this.modelIdAttr ? dive(evt.toJSON(), this.modelIdAttr) : evt.id;
                 if (id) {
                     this.trigger('change:' + id, this.parse(evt), this.apply(this.methode));
                 }
@@ -166,7 +166,7 @@
 
                 var data = this.parse(evt);
                 col.add(data);
-                if (this.onHandle) this.onHandle(data, col.get(data.id));
+                if (this.onHandle) this.onHandle(data, col.get(id));
             }
         },
 
@@ -368,7 +368,7 @@
 
         // __only change is here__ only allow get!
         if (type !== 'GET') {
-            return options.success();
+            return options.success(model, null, options);
         } else {
             origSync(method, model, options);
         }
