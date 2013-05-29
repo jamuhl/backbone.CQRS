@@ -309,6 +309,10 @@ was send as response:
 
 ## Release Notes
 
+### v0.5.6
+
+- small fixes
+
 ### v0.5.5
 
 - customizable attribute lookup for model.id and model.data in eventdenormalizers
