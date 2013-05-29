@@ -368,7 +368,7 @@
 
         // __only change is here__ only allow get!
         if (type !== 'GET') {
-            return options.success();
+            return options.success(model, null, options);
         } else {
             origSync(method, model, options);
         }

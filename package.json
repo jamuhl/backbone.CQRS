@@ -9,7 +9,7 @@
     }
   , "dependencies": { }
   , "devDependencies": {
-      "smoosh": "0.2.x"
+      "smoosh": ">=0.2.x"
     , "jake": ">=0.0.1"
   }
   , "scripts": {
