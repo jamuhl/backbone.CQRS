@@ -10,7 +10,7 @@ other technique around.
 # Download
 
 <section id="download"> 
-    <a class="button" href="public/downloads/backbone.CQRS-0.5.5.zip">backbone.CQRS v0.5.5</a> 
+    <a class="button" href="public/downloads/backbone.CQRS-0.5.6.zip">backbone.CQRS v0.5.6</a> 
 </section>
 
 # INITIALIZATION
